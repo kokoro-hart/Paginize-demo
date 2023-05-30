@@ -1,0 +1,50 @@
+@charset "utf-8";
+@use "../global";
+
+//5〜200pxまで5px刻みで生成
+// 指定するmarginの範囲を定義
+$margin-min: 1;
+$margin-max: 40;
+
+@for $i from $margin-min through $margin-max {
+  .u-sp_margin_top_#{$i * 5} {
+    @include global.under_md {
+      margin-top: #{$i * 5}px !important;
+    }
+  }
+  .u-sp_margin_right_#{$i * 5} {
+    @include global.under_md {
+      margin-right: #{$i * 5}px !important;
+    }
+  }
+  .u-sp_margin_bottom_#{$i * 5} {
+    @include global.under_md {
+      margin-bottom: #{$i * 5}px !important;
+    }
+  }
+  .u-sp_margin_left_#{$i * 5} {
+    @include global.under_md {
+      margin-left: #{$i * 5}px !important;
+    }
+  }
+  .u-pc_margin_top_#{$i * 5} {
+    @include global.md {
+      margin-top: #{$i * 5}px !important;
+    }
+  }
+  .u-pc_margin_right_#{$i * 5} {
+    @include global.md {
+      margin-right: #{$i * 5}px !important;
+    }
+  }
+  .u-pc_margin_bottom_#{$i * 5} {
+    @include global.md {
+      margin-bottom: #{$i * 5}px !important;
+    }
+  }
+  .u-pc_margin_left_#{$i * 5} {
+    @include global.md {
+      margin-left: #{$i * 5}px !important;
+    }
+  }
+}

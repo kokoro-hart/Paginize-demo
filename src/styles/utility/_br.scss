@@ -1,0 +1,16 @@
+@charset "utf-8";
+@use "../global";
+
+br {
+  &.u-brSP {
+    @include global.md {
+      display: none;
+    }
+  }
+
+  &.u-brPC {
+    @include global.under_md {
+      display: none;
+    }
+  }
+}

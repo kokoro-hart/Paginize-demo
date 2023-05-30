@@ -1,0 +1,11 @@
+@charset "utf-8";
+@use "sass:math";
+
+// 数値から単位削除
+@function strip-unit($number) {
+  @if type-of($number) == "number" and not unitless($number) {
+    @return math.div($number, ($number * 0 + 1));
+  }
+
+  @return $number;
+}
