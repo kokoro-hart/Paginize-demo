@@ -1,21 +1,35 @@
+type Option = {
+  root: string
+  nodes: string
+  counterWrap: string
+  prev: string
+  next: string
+  perPageMd: number
+  perPageUnderMd: number
+}
+
+type PartialOption = Partial<Option>
+
 export class Pagination {
-  readonly targetNodes!: NodeListOf<Element>
+  readonly targetRoot!: HTMLElement | null
 
-  readonly pageCounterWrap!: HTMLElement
+  readonly targetNodes!: NodeListOf<Element> | null
 
-  readonly buttonPrev!: HTMLElement
+  readonly pageCounterWrap!: HTMLElement | null
 
-  readonly buttonNext!: HTMLElement
+  readonly buttonPrev!: HTMLElement | null
+
+  readonly buttonNext!: HTMLElement | null
 
   readonly perPageMd!: number
 
   readonly perPageUnderMd!: number
 
-  currentPagerEl: HTMLElement | null
+  currentPagerEl!: HTMLElement | null
 
-  totalPage: number
+  totalPage!: number
 
-  totalContent: number
+  totalContent!: number
 
   perPage!: number
 
@@ -27,26 +41,42 @@ export class Pagination {
 
   maxPager!: number
 
-  constructor(
-    props: Pick<
-      Pagination,
-      "targetNodes" | "pageCounterWrap" | "buttonPrev" | "buttonNext" | "perPageMd" | "perPageUnderMd"
-    >
-  ) {
-    Object.assign(this, props)
+  constructor({
+    root = ".pagify",
+    nodes = ".pagify-item",
+    counterWrap = ".pagify-counter",
+    prev = ".pagify-prev",
+    next = ".pagify-next",
+    perPageMd = 5,
+    perPageUnderMd = 3,
+  }: PartialOption) {
+    this.targetRoot = document.querySelector(root)
 
-    const { targetNodes } = props
+    if (!this.targetRoot) return
+
+    this.targetNodes = this.targetRoot.querySelectorAll(nodes)
+
+    this.pageCounterWrap = this.targetRoot.querySelector(counterWrap)
+
+    this.buttonPrev = this.targetRoot.querySelector(prev)
+
+    this.buttonNext = this.targetRoot.querySelector(next)
 
     this.currentPagerEl = null
 
+    this.perPageMd = perPageMd
+
+    this.perPageUnderMd = perPageUnderMd
+
     this.init()
 
-    this.totalContent = targetNodes.length
+    if (!this.targetNodes) return
+
+    this.totalContent = this.targetNodes.length
 
     this.totalPage = Math.ceil(this.totalContent / this.perPage)
 
     this.registerEvents()
-
     if (this.totalContent === 0) window.location.reload()
   }
 
@@ -71,6 +101,7 @@ export class Pagination {
   }
 
   protected initConstructor() {
+    if (!this.pageCounterWrap || !this.targetNodes) return
     this.pageCounterWrap.innerHTML = ""
 
     this.currentPager = 0
@@ -95,6 +126,7 @@ export class Pagination {
   }
 
   protected registerEvents() {
+    if (!this.buttonNext || !this.buttonPrev) return
     this.buttonNext.addEventListener("click", () => {
       this.updatePageState((this.currentPager += 1))
     })
@@ -105,19 +137,27 @@ export class Pagination {
   }
 
   protected activateButtonPrev() {
+    if (!this.buttonPrev) return
     this.buttonPrev.dataset.disable = "false"
+    this.buttonPrev.style.pointerEvents = "auto"
   }
 
   protected activateButtonNext() {
+    if (!this.buttonNext) return
     this.buttonNext.dataset.disable = "false"
+    this.buttonNext.style.pointerEvents = "auto"
   }
 
   protected disabledButtonPrev() {
+    if (!this.buttonPrev) return
     this.buttonPrev.dataset.disable = "true"
+    this.buttonPrev.style.pointerEvents = "none"
   }
 
   protected disabledButtonNext = () => {
+    if (!this.buttonNext) return
     this.buttonNext.dataset.disable = "true"
+    this.buttonNext.style.pointerEvents = "none"
   }
 
   protected updateCurrentButton(count = 1) {
@@ -126,6 +166,8 @@ export class Pagination {
   }
 
   protected updateContentsView(current: number, counts: number) {
+    if (!this.targetNodes) return
+
     this.indexStart = current * counts - counts
     this.indexEnd = current * counts - 1
     const indexArray: Array<number> = []
@@ -134,17 +176,21 @@ export class Pagination {
     }
 
     this.targetNodes.forEach((element) => {
-      element.classList.remove("is-show")
+      const el = element as HTMLElement
+      el.style.display = "none"
     })
 
     this.targetNodes.forEach((element, index) => {
       if (indexArray.indexOf(index) !== -1) {
-        element.classList.add("is-show")
+        const el = element as HTMLElement
+        el.style.display = "block"
       }
     })
   }
 
   protected updatePageState(currentCount?: number) {
+    if (!this.pageCounterWrap) return
+
     if (currentCount === 1 || currentCount === undefined || this.currentPager === 1) {
       this.currentPager = 1
       this.activateButtonNext()
@@ -185,6 +231,7 @@ export class Pagination {
 
   protected createPageCounter(current: number, totalPage: number) {
     const createPagerEls = (i: number) => {
+      if (!this.pageCounterWrap) return
       const countList = document.createElement("button")
       countList.setAttribute("data-counter-id", String(i))
       countList.classList.add("pageNumber")
@@ -193,6 +240,7 @@ export class Pagination {
     }
 
     const createEllipsis = () => {
+      if (!this.pageCounterWrap) return
       const ellipsis = document.createElement("span")
       ellipsis.classList.add("pageNumberEllipsis")
       ellipsis.textContent = ". . ."
@@ -261,26 +309,5 @@ export class Pagination {
 }
 
 export const paginationDefault = () => {
-  const targetRoot = document.querySelector(".pagify")
-
-  if (!targetRoot) return
-
-  const targetNodes = targetRoot.querySelectorAll(".pagify-item")
-
-  const pageCounterWrap = targetRoot.querySelector<HTMLElement>(".pagify-counter")
-
-  const buttonPrev = targetRoot.querySelector<HTMLElement>(".pagify-prev")
-
-  const buttonNext = targetRoot.querySelector<HTMLElement>(".pagify-next")
-
-  if (!targetNodes || !pageCounterWrap || !buttonPrev || !buttonNext) return
-
-  const pdInstance = new Pagination({
-    targetNodes,
-    pageCounterWrap,
-    buttonPrev,
-    buttonNext,
-    perPageMd: 15,
-    perPageUnderMd: 12,
-  })
+  const pdInstance = new Pagination({})
 }
