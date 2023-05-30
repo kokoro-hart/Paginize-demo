@@ -1,4 +1,4 @@
-type Option = {
+type DefaultOption = {
   root: string
   nodes: string
   counterWrap: string
@@ -6,7 +6,10 @@ type Option = {
   next: string
   perPageMd: number
   perPageUnderMd: number
+  isHistory: boolean
 }
+
+type Option = DefaultOption
 
 type PartialOption = Partial<Option>
 
@@ -41,6 +44,8 @@ export class Pagination {
 
   maxPager!: number
 
+  isHistory!: boolean
+
   constructor({
     root = ".pagify",
     nodes = ".pagify-item",
@@ -49,6 +54,7 @@ export class Pagination {
     next = ".pagify-next",
     perPageMd = 5,
     perPageUnderMd = 3,
+    isHistory = true,
   }: PartialOption) {
     this.targetRoot = document.querySelector(root)
 
@@ -67,6 +73,8 @@ export class Pagination {
     this.perPageMd = perPageMd
 
     this.perPageUnderMd = perPageUnderMd
+
+    this.isHistory = isHistory
 
     this.init()
 
@@ -114,6 +122,12 @@ export class Pagination {
   }
 
   protected initQueryParams() {
+    if (!this.isHistory) {
+      this.updatePageState()
+      this.updateCurrentButton()
+      return
+    }
+
     const urlParams = new URLSearchParams(window.location.search)
     const pagedParam = urlParams.get("paged")
 
@@ -215,14 +229,17 @@ export class Pagination {
 
     this.createPageCounter(this.currentPager, this.totalPage)
 
-    const params = new URLSearchParams({ paged: String(this.currentPager) })
-    const currentURL = new URL(window.location.href)
-    currentURL.search = params.toString()
-    window.history.replaceState({}, "", currentURL.toString())
+    if (this.isHistory) {
+      const params = new URLSearchParams({ paged: String(this.currentPager) })
+      const currentURL = new URL(window.location.href)
+      currentURL.search = params.toString()
+      window.history.replaceState({}, "", currentURL.toString())
+    }
+
     this.updateCurrentButton(currentCount)
 
     document.querySelectorAll(".pageNumber").forEach((element) => {
-      element.addEventListener("click", (e) => {
+      element.addEventListener("click", () => {
         this.currentPager = Number(element.getAttribute("data-counter-id"))
         this.updatePageState(this.currentPager)
       })
