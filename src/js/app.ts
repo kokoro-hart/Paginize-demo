@@ -1,4 +1,4 @@
-import { paginationDefault } from "./pagination"
+import { paginationDefault } from "./paginationDefault"
 
 function App() {
   paginationDefault()

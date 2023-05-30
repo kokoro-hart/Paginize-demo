@@ -1,0 +1,15 @@
+---
+const maxCount = 20
+const numbers = Array.from({ length: maxCount }, (_, i) => i + 1)
+---
+
+<div class="pagify">
+  <ul class="pagify-contents">
+    {numbers.map((number) => <li class="pagify-item">{number}</li>)}
+  </ul>
+  <div class="pagify-wrapper">
+    <button type="button" class="pagify-prev">prev</button>
+    <div class="pagify-counter"></div>
+    <button type="button" class="pagify-next">next</button>
+  </div>
+</div>

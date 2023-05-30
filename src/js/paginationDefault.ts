@@ -1,6 +1,4 @@
 export class Pagination {
-  readonly targetRoot!: HTMLElement
-
   readonly targetNodes!: NodeListOf<Element>
 
   readonly pageCounterWrap!: HTMLElement
@@ -188,7 +186,6 @@ export class Pagination {
   protected createPageCounter(current: number, totalPage: number) {
     const createPagerEls = (i: number) => {
       const countList = document.createElement("button")
-      countList.setAttribute("data-ank-center", "paginationAnchor")
       countList.setAttribute("data-counter-id", String(i))
       countList.classList.add("pageNumber")
       countList.textContent = String(i)
@@ -264,17 +261,17 @@ export class Pagination {
 }
 
 export const paginationDefault = () => {
-  const targetRoot = document.getElementById("js-paginationDefault")
+  const targetRoot = document.querySelector(".pagify")
 
   if (!targetRoot) return
 
-  const targetNodes = targetRoot.querySelectorAll(".js-cardSmall")
+  const targetNodes = targetRoot.querySelectorAll(".pagify-item")
 
-  const pageCounterWrap = targetRoot.querySelector<HTMLElement>(".js-paginationCounter")
+  const pageCounterWrap = targetRoot.querySelector<HTMLElement>(".pagify-counter")
 
-  const buttonPrev = targetRoot.querySelector<HTMLElement>(".js-paginationPrev")
+  const buttonPrev = targetRoot.querySelector<HTMLElement>(".pagify-prev")
 
-  const buttonNext = targetRoot.querySelector<HTMLElement>(".js-paginationNext")
+  const buttonNext = targetRoot.querySelector<HTMLElement>(".pagify-next")
 
   if (!targetNodes || !pageCounterWrap || !buttonPrev || !buttonNext) return
 
