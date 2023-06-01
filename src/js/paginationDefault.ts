@@ -1,18 +1,47 @@
+type BreakpointOptions = Omit<PartialOption, "breakpoint"> & {
+  minWidth: number
+}
+
 type DefaultOption = {
-  root: string
-  nodes: string
-  counterWrap: string
-  prev: string
-  next: string
-  perPageMd: number
-  perPageUnderMd: number
-
+  // common
+  contentItem: string
+  perPage: number
   isNextPrev: boolean
-
   isHistory: boolean
 
+  // counter
+  pageRangeDisplayed: number
+  isEllipsis: boolean
+  ellipsisText: string
+
+  // navigation
+  prevEl: string
+  nextEl: string
+
+  // pager
+  pageNumberWrapEl: string
   pageNumberEl: string
+  pageNumberTag: string
   pageNumberHref: string
+  isFirstAndLastPlusOne: boolean
+
+  // A11y
+  nextMassage: string
+  prevMassage: string
+  bulletMessage: string
+  firstPageMessage: string
+  lastPageMessage: string
+
+  // breakpoint
+  breakpoint: BreakpointOptions
+
+  // callback
+  onPageChange: (current: number) => void | undefined
+  onClickNext: () => void | undefined
+  onClickPrev: () => void | undefined
+  onClickNumber: () => void | undefined
+  onBeforeMount: () => void | undefined
+  onMounted: () => void | undefined
 }
 
 type PartialOption = Partial<DefaultOption>
@@ -20,7 +49,7 @@ type PartialOption = Partial<DefaultOption>
 export class Pagination {
   readonly targetRoot!: HTMLElement | null
 
-  readonly targetNodes!: NodeListOf<Element> | null
+  readonly targetNodes!: NodeListOf<HTMLElement> | null
 
   readonly pageCounterWrap!: HTMLElement | null
 
@@ -28,9 +57,9 @@ export class Pagination {
 
   readonly buttonNext!: HTMLElement | null
 
-  readonly perPageMd!: number
+  readonly perPage!: number
 
-  readonly perPageUnderMd!: number
+  readonly pageRangeDisplayed!: number
 
   currentPagerEl!: HTMLElement | null
 
@@ -38,7 +67,7 @@ export class Pagination {
 
   totalContent!: number
 
-  perPage!: number
+  _perPage!: number
 
   currentPager!: number
 
@@ -46,51 +75,140 @@ export class Pagination {
 
   indexEnd!: number
 
-  maxPager!: number
+  _pageRangeDisplayed!: number
 
   isHistory!: boolean
 
+  isEllipsis!: boolean
+
+  ellipsisText!: string
+
   pageNumberEl!: string
+
+  pageNumberTag!: string
 
   pageNumberHref!: string
 
-  constructor({
-    root = ".pagify",
-    nodes = ".pagify-item",
-    counterWrap = ".pagify-counter",
-    prev = ".pagify-prev",
-    next = ".pagify-next",
-    perPageMd = 5,
-    perPageUnderMd = 3,
-    isNextPrev = true,
-    isHistory = true,
-    pageNumberEl = "button",
-    pageNumberHref = "",
-  }: PartialOption) {
+  isFirstAndLastPlusOne!: boolean
+
+  nextMassage!: string
+
+  prevMassage!: string
+
+  bulletMessage!: string
+
+  firstPageMessage!: string
+
+  lastPageMessage!: string
+
+  breakpoint!: BreakpointOptions
+
+  onPageChange!: (current: number) => void | undefined
+
+  onClickNext!: () => void | undefined
+
+  onClickPrev!: () => void | undefined
+
+  onClickNumber!: () => void | undefined
+
+  onBeforeMount!: () => void | undefined
+
+  onMounted!: () => void | undefined
+
+  constructor(
+    root: string,
+    {
+      // common
+      contentItem = ".pagify-item",
+      perPage = 5,
+      isNextPrev = true,
+      isHistory = true,
+
+      // counter
+      pageRangeDisplayed = 5,
+      isEllipsis = true,
+      ellipsisText = ". . .",
+
+      // navigation
+      prevEl = ".pagify-prev",
+      nextEl = ".pagify-next",
+
+      // pager
+      pageNumberWrapEl = ".pagify-counter",
+      pageNumberEl = ".pagify-number",
+      pageNumberTag = "button",
+      pageNumberHref = "",
+      isFirstAndLastPlusOne = false,
+
+      // A11y
+      nextMassage = "Go to next page",
+      prevMassage = "Go to prev page",
+      bulletMessage = "Go to page {{count}}",
+      firstPageMessage = "This is first page",
+      lastPageMessage = "This is last page",
+
+      // breakpoint
+      breakpoint = {
+        minWidth: 768,
+        perPage: 3,
+        pageRangeDisplayed: 7,
+      },
+
+      // callback
+      onPageChange = undefined,
+      onClickNext = undefined,
+      onClickPrev = undefined,
+      onClickNumber = undefined,
+      onBeforeMount = undefined,
+      onMounted = undefined,
+    }: PartialOption
+  ) {
+    Object.assign(this, {
+      perPage,
+      isNextPrev,
+      isHistory,
+
+      pageRangeDisplayed,
+      isEllipsis,
+      ellipsisText,
+
+      pageNumberEl,
+      pageNumberTag,
+      pageNumberHref,
+      isFirstAndLastPlusOne,
+
+      nextMassage,
+      prevMassage,
+      bulletMessage,
+      firstPageMessage,
+      lastPageMessage,
+
+      breakpoint,
+      onPageChange,
+      onClickNext,
+      onClickPrev,
+      onClickNumber,
+      onBeforeMount,
+      onMounted,
+    })
+
+    if (onBeforeMount) this.onBeforeMount()
+
     this.targetRoot = document.querySelector(root)
 
     if (!this.targetRoot) return
 
-    this.targetNodes = this.targetRoot.querySelectorAll(nodes)
+    this.targetNodes = this.targetRoot.querySelectorAll(contentItem)
 
-    this.pageCounterWrap = this.targetRoot.querySelector(counterWrap)
+    this.pageCounterWrap = this.targetRoot.querySelector(pageNumberWrapEl)
 
     if (isNextPrev) {
-      this.buttonPrev = this.targetRoot.querySelector(prev)
+      this.buttonPrev = this.targetRoot.querySelector(prevEl)
 
-      this.buttonNext = this.targetRoot.querySelector(next)
+      this.buttonNext = this.targetRoot.querySelector(nextEl)
     }
 
     this.currentPagerEl = null
-
-    Object.assign(this, {
-      perPageMd,
-      perPageUnderMd,
-      isNextPrev,
-      isHistory,
-      pageNumberEl,
-      pageNumberHref,
-    })
 
     this.init()
 
@@ -98,28 +216,32 @@ export class Pagination {
 
     this.totalContent = this.targetNodes.length
 
-    this.totalPage = Math.ceil(this.totalContent / this.perPage)
+    this.totalPage = Math.ceil(this.totalContent / this._perPage)
 
     this.registerEvents()
     if (this.totalContent === 0) window.location.reload()
+
+    if (onMounted) this.onMounted()
   }
 
   protected init() {
     const listener = (event: MediaQueryList | MediaQueryListEvent) => {
       if (event.matches) {
-        this.perPage = this.perPageMd
-        this.maxPager = 7
+        this._perPage = this.breakpoint.perPage ? this.breakpoint.perPage : this.perPage
+        this._pageRangeDisplayed = this.breakpoint.pageRangeDisplayed
+          ? this.breakpoint.pageRangeDisplayed
+          : this.perPage
         this.initConstructor()
         this.initQueryParams()
       } else {
-        this.perPage = this.perPageUnderMd
-        this.maxPager = 5
+        this._perPage = this.perPage
+        this._pageRangeDisplayed = this.pageRangeDisplayed
         this.initConstructor()
         this.initQueryParams()
       }
     }
 
-    const mediaQueryList = window.matchMedia("(min-width: 768px)")
+    const mediaQueryList = window.matchMedia(`(min-width: ${this.breakpoint.minWidth}px)`)
     mediaQueryList.onchange = listener
     listener(mediaQueryList)
   }
@@ -134,7 +256,7 @@ export class Pagination {
 
     this.indexEnd = 0
 
-    this.totalPage = Math.ceil(this.targetNodes.length / this.perPage)
+    this.totalPage = Math.ceil(this.targetNodes.length / this._perPage)
   }
 
   protected initQueryParams() {
@@ -159,10 +281,14 @@ export class Pagination {
     if (!this.buttonNext || !this.buttonPrev) return
     this.buttonNext.addEventListener("click", () => {
       this.updatePageState((this.currentPager += 1))
+      this.onPageChange !== undefined && this.onPageChange(this.currentPager)
+      this.onClickNext() !== undefined && this.onClickNext()
     })
 
     this.buttonPrev.addEventListener("click", () => {
       this.updatePageState((this.currentPager -= 1))
+      this.onPageChange !== undefined && this.onPageChange(this.currentPager)
+      this.onClickPrev() !== undefined && this.onClickPrev()
     })
   }
 
@@ -170,28 +296,32 @@ export class Pagination {
     if (!this.buttonPrev) return
     this.buttonPrev.dataset.disable = "false"
     this.buttonPrev.style.pointerEvents = "auto"
+    this.buttonPrev.setAttribute("aria-label", this.prevMassage)
   }
 
   protected activateButtonNext() {
     if (!this.buttonNext) return
     this.buttonNext.dataset.disable = "false"
     this.buttonNext.style.pointerEvents = "auto"
+    this.buttonNext.setAttribute("aria-label", this.nextMassage)
   }
 
   protected disabledButtonPrev() {
     if (!this.buttonPrev) return
     this.buttonPrev.dataset.disable = "true"
     this.buttonPrev.style.pointerEvents = "none"
+    this.buttonPrev.removeAttribute("aria-label")
   }
 
   protected disabledButtonNext = () => {
     if (!this.buttonNext) return
     this.buttonNext.dataset.disable = "true"
     this.buttonNext.style.pointerEvents = "none"
+    this.buttonNext.removeAttribute("aria-label")
   }
 
   protected updateCurrentButton(count = 1) {
-    this.currentPagerEl = document.querySelector(`.pageNumber[data-counter-id="${count}"]`)
+    this.currentPagerEl = document.querySelector(`.pagify-number[data-counter-id="${count}"]`)
     this.currentPagerEl?.setAttribute("data-current", "true")
   }
 
@@ -206,14 +336,12 @@ export class Pagination {
     }
 
     this.targetNodes.forEach((element) => {
-      const el = element as HTMLElement
-      el.style.display = "none"
+      element.style.display = "none"
     })
 
     this.targetNodes.forEach((element, index) => {
       if (indexArray.indexOf(index) !== -1) {
-        const el = element as HTMLElement
-        el.style.display = "block"
+        element.style.display = "block"
       }
     })
   }
@@ -239,7 +367,7 @@ export class Pagination {
       this.disabledButtonPrev()
     }
 
-    this.updateContentsView(this.currentPager, this.perPage)
+    this.updateContentsView(this.currentPager, this._perPage)
 
     this.pageCounterWrap.innerHTML = ""
 
@@ -254,97 +382,135 @@ export class Pagination {
 
     this.updateCurrentButton(currentCount)
 
-    document.querySelectorAll(".pageNumber").forEach((element) => {
+    document.querySelectorAll(this.pageNumberEl).forEach((element) => {
       element.addEventListener("click", () => {
         this.currentPager = Number(element.getAttribute("data-counter-id"))
         this.updatePageState(this.currentPager)
+        this.onPageChange !== undefined && this.onPageChange(this.currentPager)
+        this.onClickNumber !== undefined && this.onClickNumber()
       })
     })
   }
 
   protected createPageCounter(current: number, totalPage: number) {
-    const createPagerEls = (i: number) => {
-      if (!this.pageCounterWrap) return
-
-      const countList = document.createElement(`${this.pageNumberHref ? "a" : this.pageNumberEl}`)
-
-      this.pageNumberHref && countList.setAttribute("href", `${this.pageNumberHref}${i}`)
-      this.pageNumberEl === "button" && countList.setAttribute("type", "button")
-      countList.setAttribute("data-counter-id", String(i))
-      countList.classList.add("pageNumber")
-      countList.textContent = String(i)
-      this.pageCounterWrap.appendChild(countList)
+    if (this.isEllipsis) {
+      this.createPageCounterWithEllipsis(current, totalPage)
+    } else {
+      for (let i = 1; i <= totalPage; i += 1) {
+        this.createPagerEls(i)
+      }
     }
+  }
 
+  protected createPagerEls(i: number) {
+    if (!this.pageCounterWrap) return
+
+    const countList = document.createElement(`${this.pageNumberHref ? "a" : this.pageNumberTag}`)
+
+    this.pageNumberHref && countList.setAttribute("href", `${this.pageNumberHref}${i}`)
+    this.pageNumberTag === "button" && countList.setAttribute("type", "button")
+    countList.setAttribute("data-counter-id", String(i))
+    if (i === this.totalPage) {
+      countList.setAttribute("aria-label", `${this.lastPageMessage}`)
+    } else if (i === 1) {
+      countList.setAttribute("aria-label", `${this.firstPageMessage}`)
+    } else {
+      const bulletMessage = this.bulletMessage.replace("{{count}}", String(i))
+      countList.setAttribute("aria-label", bulletMessage)
+    }
+    countList.classList.add("pagify-number")
+    countList.textContent = String(i)
+    this.pageCounterWrap.appendChild(countList)
+  }
+
+  protected createPageCounterWithEllipsis(current: number, totalPage: number) {
     const createEllipsis = () => {
       if (!this.pageCounterWrap) return
       const ellipsis = document.createElement("span")
-      ellipsis.classList.add("pageNumberEllipsis")
-      ellipsis.textContent = ". . ."
+      ellipsis.classList.add("pagify-ellipsis")
+      ellipsis.innerHTML = this.ellipsisText
       this.pageCounterWrap.appendChild(ellipsis)
     }
 
-    const fluctuation = this.maxPager <= 5 ? 2 : 3
+    const fluctuation = this._pageRangeDisplayed <= 5 ? 2 : 3
 
-    if (totalPage > this.maxPager) {
+    if (totalPage > this._pageRangeDisplayed && this._pageRangeDisplayed > 4) {
       const startPage = 1
 
-      if (totalPage === this.maxPager + 1) {
+      if (totalPage === this._pageRangeDisplayed + 1) {
+        console.log("①")
         for (let i = 1; i <= totalPage; i += 1) {
-          createPagerEls(i)
+          this.createPagerEls(i)
         }
-      } else if (current <= this.maxPager / 2 + 1) {
+      } else if (current <= this._pageRangeDisplayed / 2 + 1) {
+        console.log("②")
+
         for (let i = startPage; i <= current + 1; i += 1) {
-          createPagerEls(i)
+          this.createPagerEls(i)
         }
 
         if (current < totalPage - 2) {
           createEllipsis()
         }
 
-        const lastPageStart = this.maxPager <= 5 ? totalPage - 1 : totalPage - 2
+        const lastPageStart = this.isFirstAndLastPlusOne ? totalPage - 1 : totalPage
         for (let i = lastPageStart; i <= totalPage; i += 1) {
-          createPagerEls(i)
+          this.createPagerEls(i)
         }
       } else if (current >= totalPage - fluctuation) {
+        console.log("③")
+
         for (let i = startPage; i <= 2; i += 1) {
-          createPagerEls(i)
+          this.createPagerEls(i)
         }
 
         createEllipsis()
 
-        const lastNumber = this.maxPager <= 5 ? 3 : 4
-        const lastPageStart = totalPage - (this.maxPager - lastNumber) - 1
+        const lastPageStart = totalPage - 4
+        console.log(lastPageStart)
         for (let i = lastPageStart; i <= totalPage; i += 1) {
-          createPagerEls(i)
+          this.createPagerEls(i)
         }
       } else {
-        const maxStart = this.maxPager <= 5 ? 1 : 2
+        console.log("④")
+        const maxStart = this.isFirstAndLastPlusOne ? 2 : 1
         for (let i = startPage; i <= maxStart; i += 1) {
-          createPagerEls(i)
+          this.createPagerEls(i)
         }
 
         createEllipsis()
 
         for (let i = current - 1; i <= current + 1; i += 1) {
-          createPagerEls(i)
+          this.createPagerEls(i)
         }
 
         createEllipsis()
 
-        const lastPageStart = this.maxPager <= 5 ? totalPage : totalPage - 1
+        const lastPageStart = this.isFirstAndLastPlusOne ? totalPage - 1 : totalPage
         for (let i = lastPageStart; i <= totalPage; i += 1) {
-          createPagerEls(i)
+          this.createPagerEls(i)
         }
       }
     } else {
       for (let i = 1; i <= totalPage; i += 1) {
-        createPagerEls(i)
+        this.createPagerEls(i)
       }
     }
   }
 }
 
 export const paginationDefault = () => {
-  new Pagination({})
+  new Pagination(".pagify", {
+    nextMassage: "次へ進む",
+    prevMassage: "前へ戻る",
+    bulletMessage: "ページ{{count}}へ移動",
+    firstPageMessage: "最初のページです",
+    lastPageMessage: "最後のページです",
+
+    breakpoint: {
+      minWidth: 768,
+      perPage: 9,
+      pageRangeDisplayed: 5,
+    },
+  })
 }
