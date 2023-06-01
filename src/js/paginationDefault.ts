@@ -6,12 +6,16 @@ type DefaultOption = {
   next: string
   perPageMd: number
   perPageUnderMd: number
+
+  isNextPrev: boolean
+
   isHistory: boolean
+
+  pageNumberEl: string
+  pageNumberHref: string
 }
 
-type Option = DefaultOption
-
-type PartialOption = Partial<Option>
+type PartialOption = Partial<DefaultOption>
 
 export class Pagination {
   readonly targetRoot!: HTMLElement | null
@@ -46,6 +50,10 @@ export class Pagination {
 
   isHistory!: boolean
 
+  pageNumberEl!: string
+
+  pageNumberHref!: string
+
   constructor({
     root = ".pagify",
     nodes = ".pagify-item",
@@ -54,7 +62,10 @@ export class Pagination {
     next = ".pagify-next",
     perPageMd = 5,
     perPageUnderMd = 3,
+    isNextPrev = true,
     isHistory = true,
+    pageNumberEl = "button",
+    pageNumberHref = "",
   }: PartialOption) {
     this.targetRoot = document.querySelector(root)
 
@@ -64,17 +75,22 @@ export class Pagination {
 
     this.pageCounterWrap = this.targetRoot.querySelector(counterWrap)
 
-    this.buttonPrev = this.targetRoot.querySelector(prev)
+    if (isNextPrev) {
+      this.buttonPrev = this.targetRoot.querySelector(prev)
 
-    this.buttonNext = this.targetRoot.querySelector(next)
+      this.buttonNext = this.targetRoot.querySelector(next)
+    }
 
     this.currentPagerEl = null
 
-    this.perPageMd = perPageMd
-
-    this.perPageUnderMd = perPageUnderMd
-
-    this.isHistory = isHistory
+    Object.assign(this, {
+      perPageMd,
+      perPageUnderMd,
+      isNextPrev,
+      isHistory,
+      pageNumberEl,
+      pageNumberHref,
+    })
 
     this.init()
 
@@ -249,7 +265,11 @@ export class Pagination {
   protected createPageCounter(current: number, totalPage: number) {
     const createPagerEls = (i: number) => {
       if (!this.pageCounterWrap) return
-      const countList = document.createElement("button")
+
+      const countList = document.createElement(`${this.pageNumberHref ? "a" : this.pageNumberEl}`)
+
+      this.pageNumberHref && countList.setAttribute("href", `${this.pageNumberHref}${i}`)
+      this.pageNumberEl === "button" && countList.setAttribute("type", "button")
       countList.setAttribute("data-counter-id", String(i))
       countList.classList.add("pageNumber")
       countList.textContent = String(i)
@@ -326,5 +346,5 @@ export class Pagination {
 }
 
 export const paginationDefault = () => {
-  const pdInstance = new Pagination({})
+  new Pagination({})
 }
