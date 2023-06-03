@@ -1,51 +1,3 @@
-type BreakpointOptions = Omit<PartialOption, "breakpoint"> & {
-  minWidth: number
-}
-
-type DefaultOption = {
-  // common
-  contentItem: string
-  perPage: number
-  isNextPrev: boolean
-  isHistory: boolean
-
-  // counter
-  pageRangeDisplayed: number
-  isEllipsis: boolean
-  ellipsisText: string
-
-  // navigation
-  prevEl: string
-  nextEl: string
-
-  // pager
-  pageNumberWrapEl: string
-  pageNumberEl: string
-  pageNumberTag: string
-  pageNumberHref: string
-  isFirstAndLastPlusOne: boolean
-
-  // A11y
-  nextMassage: string
-  prevMassage: string
-  bulletMessage: string
-  firstPageMessage: string
-  lastPageMessage: string
-
-  // breakpoint
-  breakpoint: BreakpointOptions
-
-  // callback
-  onPageChange: (current: number) => void | undefined
-  onClickNext: () => void | undefined
-  onClickPrev: () => void | undefined
-  onClickNumber: () => void | undefined
-  onBeforeMount: () => void | undefined
-  onMounted: () => void | undefined
-}
-
-type PartialOption = Partial<DefaultOption>
-
 export class Pagination {
   readonly targetRoot!: HTMLElement | null
 
@@ -60,6 +12,8 @@ export class Pagination {
   readonly perPage!: number
 
   readonly pageRangeDisplayed!: number
+
+  readonly increment!: boolean
 
   currentPagerEl!: HTMLElement | null
 
@@ -89,7 +43,7 @@ export class Pagination {
 
   pageNumberHref!: string
 
-  isFirstAndLastPlusOne!: boolean
+  _increment!: boolean
 
   nextMassage!: string
 
@@ -138,7 +92,7 @@ export class Pagination {
       pageNumberEl = ".pagify-number",
       pageNumberTag = "button",
       pageNumberHref = "",
-      isFirstAndLastPlusOne = false,
+      increment = false,
 
       // A11y
       nextMassage = "Go to next page",
@@ -150,8 +104,6 @@ export class Pagination {
       // breakpoint
       breakpoint = {
         minWidth: 768,
-        perPage: 3,
-        pageRangeDisplayed: 7,
       },
 
       // callback
@@ -161,7 +113,7 @@ export class Pagination {
       onClickNumber = undefined,
       onBeforeMount = undefined,
       onMounted = undefined,
-    }: PartialOption
+    }: PaginizeOption
   ) {
     Object.assign(this, {
       perPage,
@@ -175,7 +127,7 @@ export class Pagination {
       pageNumberEl,
       pageNumberTag,
       pageNumberHref,
-      isFirstAndLastPlusOne,
+      increment,
 
       nextMassage,
       prevMassage,
@@ -230,12 +182,15 @@ export class Pagination {
         this._perPage = this.breakpoint.perPage ? this.breakpoint.perPage : this.perPage
         this._pageRangeDisplayed = this.breakpoint.pageRangeDisplayed
           ? this.breakpoint.pageRangeDisplayed
-          : this.perPage
+          : this.pageRangeDisplayed
+        this._increment = this.breakpoint.increment ? this.breakpoint.increment : this.increment
+
         this.initConstructor()
         this.initQueryParams()
       } else {
         this._perPage = this.perPage
         this._pageRangeDisplayed = this.pageRangeDisplayed
+        this._increment = this.increment
         this.initConstructor()
         this.initQueryParams()
       }
@@ -418,7 +373,7 @@ export class Pagination {
       const bulletMessage = this.bulletMessage.replace("{{count}}", String(i))
       countList.setAttribute("aria-label", bulletMessage)
     }
-    countList.classList.add("pagify-number")
+    countList.classList.add(this.pageNumberEl.replace(".", ""))
     countList.textContent = String(i)
     this.pageCounterWrap.appendChild(countList)
   }
@@ -432,20 +387,17 @@ export class Pagination {
       this.pageCounterWrap.appendChild(ellipsis)
     }
 
-    const fluctuation = this._pageRangeDisplayed <= 5 ? 2 : 3
-
     if (totalPage > this._pageRangeDisplayed && this._pageRangeDisplayed > 4) {
       const startPage = 1
 
-      if (totalPage === this._pageRangeDisplayed + 1) {
-        console.log("①")
+      if (totalPage === 5 + 1) {
         for (let i = 1; i <= totalPage; i += 1) {
           this.createPagerEls(i)
         }
-      } else if (current <= this._pageRangeDisplayed / 2 + 1) {
-        console.log("②")
+      } else if (current <= 5 / 2 + 1.5) {
+        const plusNum = this._increment ? 2 : 1
 
-        for (let i = startPage; i <= current + 1; i += 1) {
+        for (let i = startPage; i <= current + plusNum; i += 1) {
           this.createPagerEls(i)
         }
 
@@ -453,43 +405,32 @@ export class Pagination {
           createEllipsis()
         }
 
-        const lastPageStart = this.isFirstAndLastPlusOne ? totalPage - 1 : totalPage
-        for (let i = lastPageStart; i <= totalPage; i += 1) {
-          this.createPagerEls(i)
-        }
-      } else if (current >= totalPage - fluctuation) {
-        console.log("③")
-
+        this.createPagerEls(totalPage)
+      } else if (current >= totalPage - 2) {
         for (let i = startPage; i <= 2; i += 1) {
           this.createPagerEls(i)
         }
 
         createEllipsis()
 
-        const lastPageStart = totalPage - 4
-        console.log(lastPageStart)
+        const lastPageStart = totalPage - 3
         for (let i = lastPageStart; i <= totalPage; i += 1) {
           this.createPagerEls(i)
         }
       } else {
-        console.log("④")
-        const maxStart = this.isFirstAndLastPlusOne ? 2 : 1
-        for (let i = startPage; i <= maxStart; i += 1) {
+        for (let i = startPage; i <= 1; i += 1) {
+          this.createPagerEls(i)
+        }
+
+        createEllipsis()
+        const plusNum = this._increment ? 2 : 1
+        for (let i = current - plusNum; i <= current + plusNum; i += 1) {
           this.createPagerEls(i)
         }
 
         createEllipsis()
 
-        for (let i = current - 1; i <= current + 1; i += 1) {
-          this.createPagerEls(i)
-        }
-
-        createEllipsis()
-
-        const lastPageStart = this.isFirstAndLastPlusOne ? totalPage - 1 : totalPage
-        for (let i = lastPageStart; i <= totalPage; i += 1) {
-          this.createPagerEls(i)
-        }
+        this.createPagerEls(totalPage)
       }
     } else {
       for (let i = 1; i <= totalPage; i += 1) {
@@ -506,11 +447,58 @@ export const paginationDefault = () => {
     bulletMessage: "ページ{{count}}へ移動",
     firstPageMessage: "最初のページです",
     lastPageMessage: "最後のページです",
-
-    breakpoint: {
-      minWidth: 768,
-      perPage: 9,
-      pageRangeDisplayed: 5,
-    },
+    perPage: 8,
+    pageRangeDisplayed: 5,
+    increment: true,
   })
 }
+
+type BreakpointOptions = Pick<PaginizeOption, "perPage" | "pageRangeDisplayed" | "increment"> & {
+  minWidth: number
+}
+
+type DefaultOption = {
+  // common
+  contentItem: string
+  perPage: number
+  isNextPrev: boolean
+  isHistory: boolean
+
+  // counter
+  pageRangeDisplayed: number
+
+  // navigation
+  prevEl: string
+  nextEl: string
+
+  // pager
+  pageNumberWrapEl: string
+  pageNumberEl: string
+  pageNumberTag: string
+  pageNumberHref: string
+  increment: boolean
+
+  // Ellipsis
+  isEllipsis: boolean
+  ellipsisText: string
+
+  // A11y
+  nextMassage: string
+  prevMassage: string
+  bulletMessage: string
+  firstPageMessage: string
+  lastPageMessage: string
+
+  // breakpoint
+  breakpoint: BreakpointOptions
+
+  // callback
+  onPageChange: (current: number) => void | undefined
+  onClickNext: () => void | undefined
+  onClickPrev: () => void | undefined
+  onClickNumber: () => void | undefined
+  onBeforeMount: () => void | undefined
+  onMounted: () => void | undefined
+}
+
+type PaginizeOption = Partial<DefaultOption>
