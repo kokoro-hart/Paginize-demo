@@ -1,5 +1,5 @@
 @charset "utf-8";
-@use "../global";
+@use "../global" as *;
 
 * {
   box-sizing: border-box;
@@ -24,11 +24,11 @@ body {
 }
 
 body {
-  color: global.$color_black;
+  color: $color_black;
   overflow-wrap: break-word;
 
-  @include global.fz(16);
-  @include global.font_serif;
+  @include fz(16);
+  @include font_serif;
 
   // 背景固定
   &._isScrollLock {
@@ -119,7 +119,7 @@ a {
   }
 
   &:hover {
-    @include global.md {
+    @include md {
       text-decoration: none;
     }
   }
@@ -182,10 +182,10 @@ q::before {
 }
 
 .siteContent {
-  margin-top: global.$header_height_sp;
+  margin-top: $header_height_sp;
 
-  @include global.md {
-    margin-top: global.$header_height;
+  @include md {
+    margin-top: $header_height;
   }
 }
 
