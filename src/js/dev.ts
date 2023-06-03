@@ -1,4 +1,55 @@
-class Pagination {
+export type DefaultOption = {
+  // common
+  contentItem: string
+  perPage: number
+  isNextPrev: boolean
+  isHistory: boolean
+
+  // counter
+  pageRangeDisplayed: number
+
+  // navigation
+  prevEl: string
+  nextEl: string
+
+  // pager
+  pageNumberWrapEl: string
+  pageNumberEl: string
+  pageNumberTag: string
+  pageNumberHref: string
+  isChooseUp: boolean
+
+  // Ellipsis
+  isEllipsis: boolean
+  ellipsisText: string
+
+  // A11y
+  nextMassage: string
+  prevMassage: string
+  bulletMessage: string
+  firstPageMessage: string
+  lastPageMessage: string
+
+  // callback
+  onPageChange: (current: number) => void | undefined
+  onClickNext: () => void | undefined
+  onClickPrev: () => void | undefined
+  onClickNumber: () => void | undefined
+  onBeforeMount: () => void | undefined
+  onMounted: () => void | undefined
+}
+
+export type PartialOption = Partial<DefaultOption>
+
+export type BreakpointOptions = Pick<PartialOption, "perPage" | "pageRangeDisplayed" | "isChooseUp"> & {
+  minWidth: number
+}
+
+export type PaginizeOption = PartialOption & {
+  breakpoint?: BreakpointOptions
+}
+
+export class Pagination {
   readonly targetRoot!: HTMLElement | null
 
   readonly targetNodes!: NodeListOf<HTMLElement> | null
@@ -73,7 +124,7 @@ class Pagination {
     root: string,
     {
       // common
-      contentItem = ".pagininze-item",
+      contentItem = ".paginize-item",
       perPage = 5,
       isNextPrev = true,
       isHistory = true,
@@ -84,12 +135,12 @@ class Pagination {
       ellipsisText = ". . .",
 
       // navigation
-      prevEl = ".pagininze-prev",
-      nextEl = ".pagininze-next",
+      prevEl = ".paginize-prev",
+      nextEl = ".paginize-next",
 
       // pager
-      pageNumberWrapEl = ".pagininze-counter",
-      pageNumberEl = ".pagininze-number",
+      pageNumberWrapEl = ".paginize-counter",
+      pageNumberEl = ".paginize-number",
       pageNumberTag = "button",
       pageNumberHref = "",
       isChooseUp = false,
@@ -236,14 +287,14 @@ class Pagination {
     if (!this.buttonNext || !this.buttonPrev) return
     this.buttonNext.addEventListener("click", () => {
       this.updatePageState((this.currentPager += 1))
-      this.onPageChange !== undefined && this.onPageChange(this.currentPager)
-      this.onClickNext() !== undefined && this.onClickNext()
+      if (this.onPageChange !== undefined) this.onPageChange(this.currentPager)
+      if (this.onClickNext !== undefined) this.onClickNext()
     })
 
     this.buttonPrev.addEventListener("click", () => {
       this.updatePageState((this.currentPager -= 1))
-      this.onPageChange !== undefined && this.onPageChange(this.currentPager)
-      this.onClickPrev() !== undefined && this.onClickPrev()
+      if (this.onPageChange !== undefined) this.onPageChange(this.currentPager)
+      if (this.onClickPrev() !== undefined) this.onClickPrev()
     })
   }
 
@@ -276,7 +327,7 @@ class Pagination {
   }
 
   protected updateCurrentButton(count = 1) {
-    this.currentPagerEl = document.querySelector(`.pagininze-number[data-counter-id="${count}"]`)
+    this.currentPagerEl = document.querySelector(`.paginize-number[data-counter-id="${count}"]`)
     this.currentPagerEl?.setAttribute("data-current", "true")
   }
 
@@ -285,18 +336,20 @@ class Pagination {
 
     this.indexStart = current * counts - counts
     this.indexEnd = current * counts - 1
-    const indexArray: Array<number> = []
+    const indexArray: number[] = []
     for (let i = this.indexStart; i < this.indexEnd + 1; i += 1) {
       indexArray.push(i)
     }
 
     this.targetNodes.forEach((element) => {
-      element.style.display = "none"
+      const el = element
+      el.style.display = "none"
     })
 
     this.targetNodes.forEach((element, index) => {
       if (indexArray.indexOf(index) !== -1) {
-        element.style.display = "block"
+        const el = element
+        el.style.display = "block"
       }
     })
   }
@@ -341,8 +394,8 @@ class Pagination {
       element.addEventListener("click", () => {
         this.currentPager = Number(element.getAttribute("data-counter-id"))
         this.updatePageState(this.currentPager)
-        this.onPageChange !== undefined && this.onPageChange(this.currentPager)
-        this.onClickNumber !== undefined && this.onClickNumber()
+        if (this.onPageChange !== undefined) this.onPageChange(this.currentPager)
+        if (this.onClickNumber !== undefined) this.onClickNumber()
       })
     })
   }
@@ -362,8 +415,9 @@ class Pagination {
 
     const countList = document.createElement(`${this.pageNumberHref ? "a" : this.pageNumberTag}`)
 
-    this.pageNumberHref && countList.setAttribute("href", `${this.pageNumberHref}${i}`)
-    this.pageNumberTag === "button" && countList.setAttribute("type", "button")
+    if (this.pageNumberHref) countList.setAttribute("href", `${this.pageNumberHref}${i}`)
+    if (this.pageNumberTag === "button") countList.setAttribute("type", "button")
+
     countList.setAttribute("data-counter-id", String(i))
     if (i === this.totalPage) {
       countList.setAttribute("aria-label", `${this.lastPageMessage}`)
@@ -382,7 +436,7 @@ class Pagination {
     const createEllipsis = () => {
       if (!this.pageCounterWrap) return
       const ellipsis = document.createElement("span")
-      ellipsis.classList.add("pagininze-ellipsis")
+      ellipsis.classList.add("paginize-ellipsis")
       ellipsis.innerHTML = this.ellipsisText
       this.pageCounterWrap.appendChild(ellipsis)
     }
@@ -439,68 +493,3 @@ class Pagination {
     }
   }
 }
-
-// export const paginationDefault = () => {
-//   new Pagination(".pagininze", {
-//     nextMassage: "次へ進む",
-//     prevMassage: "前へ戻る",
-//     bulletMessage: "ページ{{count}}へ移動",
-//     firstPageMessage: "最初のページです",
-//     lastPageMessage: "最後のページです",
-//     // perPage: 3,
-//     // pageRangeDisplayed: 5,
-//     isChooseUp: true,
-//   })
-// }
-
-export default Pagination
-
-type BreakpointOptions = Pick<PaginizeOption, "perPage" | "pageRangeDisplayed" | "isChooseUp"> & {
-  minWidth: number
-}
-
-type DefaultOption = {
-  // common
-  contentItem: string
-  perPage: number
-  isNextPrev: boolean
-  isHistory: boolean
-
-  // counter
-  pageRangeDisplayed: number
-
-  // navigation
-  prevEl: string
-  nextEl: string
-
-  // pager
-  pageNumberWrapEl: string
-  pageNumberEl: string
-  pageNumberTag: string
-  pageNumberHref: string
-  isChooseUp: boolean
-
-  // Ellipsis
-  isEllipsis: boolean
-  ellipsisText: string
-
-  // A11y
-  nextMassage: string
-  prevMassage: string
-  bulletMessage: string
-  firstPageMessage: string
-  lastPageMessage: string
-
-  // breakpoint
-  breakpoint: BreakpointOptions
-
-  // callback
-  onPageChange: (current: number) => void | undefined
-  onClickNext: () => void | undefined
-  onClickPrev: () => void | undefined
-  onClickNumber: () => void | undefined
-  onBeforeMount: () => void | undefined
-  onMounted: () => void | undefined
-}
-
-type PaginizeOption = Partial<DefaultOption>

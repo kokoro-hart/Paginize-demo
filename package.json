@@ -34,6 +34,7 @@
     ]
   },
   "dependencies": {
+    "@kokorotobita/paginize": "^1.0.6",
     "astro": "^2.0.11",
     "library-test-kokorotobita": "^1.0.0"
   },
