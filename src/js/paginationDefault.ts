@@ -1,4 +1,4 @@
-export class Pagination {
+class Pagination {
   readonly targetRoot!: HTMLElement | null
 
   readonly targetNodes!: NodeListOf<HTMLElement> | null
@@ -440,18 +440,20 @@ export class Pagination {
   }
 }
 
-export const paginationDefault = () => {
-  new Pagination(".pagininze", {
-    nextMassage: "次へ進む",
-    prevMassage: "前へ戻る",
-    bulletMessage: "ページ{{count}}へ移動",
-    firstPageMessage: "最初のページです",
-    lastPageMessage: "最後のページです",
-    // perPage: 3,
-    // pageRangeDisplayed: 5,
-    isChooseUp: true,
-  })
-}
+// export const paginationDefault = () => {
+//   new Pagination(".pagininze", {
+//     nextMassage: "次へ進む",
+//     prevMassage: "前へ戻る",
+//     bulletMessage: "ページ{{count}}へ移動",
+//     firstPageMessage: "最初のページです",
+//     lastPageMessage: "最後のページです",
+//     // perPage: 3,
+//     // pageRangeDisplayed: 5,
+//     isChooseUp: true,
+//   })
+// }
+
+export default Pagination
 
 type BreakpointOptions = Pick<PaginizeOption, "perPage" | "pageRangeDisplayed" | "isChooseUp"> & {
   minWidth: number
