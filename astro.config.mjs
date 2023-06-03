@@ -6,7 +6,6 @@ import image from "@astrojs/image"
 import yaml from "@rollup/plugin-yaml"
 import { defineConfig } from "astro/config"
 import compress from "astro-compress"
-import postcssPresetEnv from "postcss-preset-env"
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -42,24 +41,8 @@ export default defineConfig({
       rollupOptions: {
         output: {
           assetFileNames: "[ext]/[name][extname]",
-          entryFileNames: "js/app.js",
+          entryFileNames: "js/paginize.min.js",
         },
-      },
-    },
-    css: {
-      postcss: {
-        plugins: [
-          postcssPresetEnv({
-            autoprefixer: {
-              flexbox: false,
-              grid: true,
-            },
-            stage: 3,
-            features: {
-              "custom-properties": false,
-            },
-          }),
-        ],
       },
     },
     plugins: [yaml()],

@@ -4,7 +4,9 @@ dist/svg
 dist/chunks
 dist/_astro
 dist/favicon.svg
+dist/robots.txt
 .output/
+
 
 # Dependencies
 node_modules/

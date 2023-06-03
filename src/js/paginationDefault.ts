@@ -13,7 +13,7 @@ export class Pagination {
 
   readonly pageRangeDisplayed!: number
 
-  readonly increment!: boolean
+  readonly isChooseUp!: boolean
 
   currentPagerEl!: HTMLElement | null
 
@@ -43,7 +43,7 @@ export class Pagination {
 
   pageNumberHref!: string
 
-  _increment!: boolean
+  _isChooseUp!: boolean
 
   nextMassage!: string
 
@@ -73,7 +73,7 @@ export class Pagination {
     root: string,
     {
       // common
-      contentItem = ".pagify-item",
+      contentItem = ".pagininze-item",
       perPage = 5,
       isNextPrev = true,
       isHistory = true,
@@ -84,15 +84,15 @@ export class Pagination {
       ellipsisText = ". . .",
 
       // navigation
-      prevEl = ".pagify-prev",
-      nextEl = ".pagify-next",
+      prevEl = ".pagininze-prev",
+      nextEl = ".pagininze-next",
 
       // pager
-      pageNumberWrapEl = ".pagify-counter",
-      pageNumberEl = ".pagify-number",
+      pageNumberWrapEl = ".pagininze-counter",
+      pageNumberEl = ".pagininze-number",
       pageNumberTag = "button",
       pageNumberHref = "",
-      increment = false,
+      isChooseUp = false,
 
       // A11y
       nextMassage = "Go to next page",
@@ -127,7 +127,7 @@ export class Pagination {
       pageNumberEl,
       pageNumberTag,
       pageNumberHref,
-      increment,
+      isChooseUp,
 
       nextMassage,
       prevMassage,
@@ -183,14 +183,14 @@ export class Pagination {
         this._pageRangeDisplayed = this.breakpoint.pageRangeDisplayed
           ? this.breakpoint.pageRangeDisplayed
           : this.pageRangeDisplayed
-        this._increment = this.breakpoint.increment ? this.breakpoint.increment : this.increment
+        this._isChooseUp = this.breakpoint.isChooseUp ? this.breakpoint.isChooseUp : this.isChooseUp
 
         this.initConstructor()
         this.initQueryParams()
       } else {
         this._perPage = this.perPage
         this._pageRangeDisplayed = this.pageRangeDisplayed
-        this._increment = this.increment
+        this._isChooseUp = this.isChooseUp
         this.initConstructor()
         this.initQueryParams()
       }
@@ -276,7 +276,7 @@ export class Pagination {
   }
 
   protected updateCurrentButton(count = 1) {
-    this.currentPagerEl = document.querySelector(`.pagify-number[data-counter-id="${count}"]`)
+    this.currentPagerEl = document.querySelector(`.pagininze-number[data-counter-id="${count}"]`)
     this.currentPagerEl?.setAttribute("data-current", "true")
   }
 
@@ -382,7 +382,7 @@ export class Pagination {
     const createEllipsis = () => {
       if (!this.pageCounterWrap) return
       const ellipsis = document.createElement("span")
-      ellipsis.classList.add("pagify-ellipsis")
+      ellipsis.classList.add("pagininze-ellipsis")
       ellipsis.innerHTML = this.ellipsisText
       this.pageCounterWrap.appendChild(ellipsis)
     }
@@ -395,7 +395,7 @@ export class Pagination {
           this.createPagerEls(i)
         }
       } else if (current <= 5 / 2 + 1.5) {
-        const plusNum = this._increment ? 2 : 1
+        const plusNum = this._isChooseUp ? 2 : 1
 
         for (let i = startPage; i <= current + plusNum; i += 1) {
           this.createPagerEls(i)
@@ -423,7 +423,7 @@ export class Pagination {
         }
 
         createEllipsis()
-        const plusNum = this._increment ? 2 : 1
+        const plusNum = this._isChooseUp ? 2 : 1
         for (let i = current - plusNum; i <= current + plusNum; i += 1) {
           this.createPagerEls(i)
         }
@@ -441,19 +441,19 @@ export class Pagination {
 }
 
 export const paginationDefault = () => {
-  new Pagination(".pagify", {
+  new Pagination(".pagininze", {
     nextMassage: "次へ進む",
     prevMassage: "前へ戻る",
     bulletMessage: "ページ{{count}}へ移動",
     firstPageMessage: "最初のページです",
     lastPageMessage: "最後のページです",
-    perPage: 8,
-    pageRangeDisplayed: 5,
-    increment: true,
+    // perPage: 3,
+    // pageRangeDisplayed: 5,
+    isChooseUp: true,
   })
 }
 
-type BreakpointOptions = Pick<PaginizeOption, "perPage" | "pageRangeDisplayed" | "increment"> & {
+type BreakpointOptions = Pick<PaginizeOption, "perPage" | "pageRangeDisplayed" | "isChooseUp"> & {
   minWidth: number
 }
 
@@ -476,7 +476,7 @@ type DefaultOption = {
   pageNumberEl: string
   pageNumberTag: string
   pageNumberHref: string
-  increment: boolean
+  isChooseUp: boolean
 
   // Ellipsis
   isEllipsis: boolean

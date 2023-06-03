@@ -3,13 +3,13 @@ const maxCount = 50
 const numbers = Array.from({ length: maxCount }, (_, i) => i + 1)
 ---
 
-<div class="pagify">
-  <ul class="pagify-contents">
-    {numbers.map((number) => <li class="pagify-item">{number}</li>)}
+<div class="pagininze">
+  <ul class="pagininze-contents">
+    {numbers.map((number) => <li class="pagininze-item">{number}</li>)}
   </ul>
-  <div class="pagify-wrapper">
-    <button type="button" class="pagify-prev" aria-label="Back to Previous Page">&lt;</button>
-    <div class="pagify-counter"></div>
-    <button type="button" class="pagify-next" aria-label="Go to next page">&gt;</button>
+  <div class="pagininze-wrapper">
+    <button type="button" class="pagininze-prev" aria-label="Back to Previous Page">&lt;</button>
+    <div class="pagininze-counter"></div>
+    <button type="button" class="pagininze-next" aria-label="Go to next page">&gt;</button>
   </div>
 </div>
