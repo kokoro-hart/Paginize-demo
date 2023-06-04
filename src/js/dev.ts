@@ -458,10 +458,8 @@ export class Paginize {
         for (let i = 1; i <= totalPage; i += 1) {
           this.createPagerEls(i)
         }
-      } else if (current <= 5 / 2 + 1.5) {
-        const plusNum = this._isChooseUp ? 2 : 1
-
-        for (let i = startPage; i <= current + plusNum; i += 1) {
+      } else if (current <= 3) {
+        for (let i = startPage; i <= current + 2; i += 1) {
           this.createPagerEls(i)
         }
 

@@ -3,9 +3,7 @@ import { Paginize } from "./dev"
 
 function App() {
   // running dev
-  const pagination = new Paginize(".paginize", {
-    perPage: 8,
-  })
+  const pagination = new Paginize(".paginize")
 
   // running lib
   // paginationLib()

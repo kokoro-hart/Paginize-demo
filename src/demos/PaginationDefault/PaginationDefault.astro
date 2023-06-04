@@ -8,12 +8,6 @@ const numbers = Array.from({ length: maxCount }, (_, i) => i + 1)
     {numbers.map((number) => <li class="paginize-content">{number}</li>)}
   </ul>
 
-  <!-- <div class="paginize-wrapper">
-    <button type="button" class="paginize-prev" aria-label="Back to Previous Page">&lt;</button>
-    <div class="paginize-counter"></div>
-    <button type="button" class="paginize-next" aria-label="Go to next page">&gt;</button>
-  </div> -->
-
   <nav aria-label="pagination" class="paginize-wrapper">
     <button type="button" class="paginize-prev" aria-label="Back to Previous Page">&lt;</button>
     <ol class="paginize-counter-list" aria-busy="true"></ol>
