@@ -13,7 +13,8 @@ export type DefaultOption = {
   nextEl: string
 
   // pager
-  pageNumberWrapEl: string
+  pageNumberList: string
+  pageNumberItem: string
   pageNumberEl: string
   pageNumberTag: string
   pageNumberHref: string
@@ -49,7 +50,7 @@ export type PaginizeOption = PartialOption & {
   breakpoint?: BreakpointOptions
 }
 
-export class Pagination {
+export class Paginize {
   readonly targetRoot!: HTMLElement | null
 
   readonly targetNodes!: NodeListOf<HTMLElement> | null
@@ -88,6 +89,8 @@ export class Pagination {
 
   ellipsisText!: string
 
+  pageNumberItem!: string
+
   pageNumberEl!: string
 
   pageNumberTag!: string
@@ -124,7 +127,7 @@ export class Pagination {
     root: string,
     {
       // common
-      contentItem = ".paginize-item",
+      contentItem = ".paginize-content",
       perPage = 5,
       isNextPrev = true,
       isHistory = true,
@@ -139,7 +142,8 @@ export class Pagination {
       nextEl = ".paginize-next",
 
       // pager
-      pageNumberWrapEl = ".paginize-counter",
+      pageNumberList = ".paginize-counter-list",
+      pageNumberItem = ".paginize-counter-item",
       pageNumberEl = ".paginize-number",
       pageNumberTag = "button",
       pageNumberHref = "",
@@ -164,7 +168,7 @@ export class Pagination {
       onClickNumber = undefined,
       onBeforeMount = undefined,
       onMounted = undefined,
-    }: PaginizeOption
+    }: PaginizeOption = {}
   ) {
     Object.assign(this, {
       perPage,
@@ -175,6 +179,7 @@ export class Pagination {
       isEllipsis,
       ellipsisText,
 
+      pageNumberItem,
       pageNumberEl,
       pageNumberTag,
       pageNumberHref,
@@ -203,7 +208,7 @@ export class Pagination {
 
     this.targetNodes = this.targetRoot.querySelectorAll(contentItem)
 
-    this.pageCounterWrap = this.targetRoot.querySelector(pageNumberWrapEl)
+    this.pageCounterWrap = this.targetRoot.querySelector(pageNumberList)
 
     if (isNextPrev) {
       this.buttonPrev = this.targetRoot.querySelector(prevEl)
@@ -328,7 +333,7 @@ export class Pagination {
 
   protected updateCurrentButton(count = 1) {
     this.currentPagerEl = document.querySelector(`.paginize-number[data-counter-id="${count}"]`)
-    this.currentPagerEl?.setAttribute("data-current", "true")
+    this.currentPagerEl?.setAttribute("aria-current", "page")
   }
 
   protected updateContentsView(current: number, counts: number) {
@@ -413,6 +418,7 @@ export class Pagination {
   protected createPagerEls(i: number) {
     if (!this.pageCounterWrap) return
 
+    const liElement = document.createElement("li")
     const countList = document.createElement(`${this.pageNumberHref ? "a" : this.pageNumberTag}`)
 
     if (this.pageNumberHref) countList.setAttribute("href", `${this.pageNumberHref}${i}`)
@@ -429,10 +435,14 @@ export class Pagination {
     }
     countList.classList.add(this.pageNumberEl.replace(".", ""))
     countList.textContent = String(i)
-    this.pageCounterWrap.appendChild(countList)
+    liElement.classList.add(this.pageNumberItem.replace(".", ""))
+    this.pageCounterWrap.appendChild(liElement)
+    liElement.appendChild(countList)
   }
 
   protected createPageCounterWithEllipsis(current: number, totalPage: number) {
+    this.pageCounterWrap?.setAttribute("aria-busy", "true")
+
     const createEllipsis = () => {
       if (!this.pageCounterWrap) return
       const ellipsis = document.createElement("span")
@@ -491,5 +501,7 @@ export class Pagination {
         this.createPagerEls(i)
       }
     }
+
+    this.pageCounterWrap?.setAttribute("aria-busy", "false")
   }
 }

@@ -34,9 +34,8 @@
     ]
   },
   "dependencies": {
-    "@kokorotobita/paginize": "^1.0.6",
-    "astro": "^2.0.11",
-    "library-test-kokorotobita": "^1.0.0"
+    "@kokorotobita/paginize": "^1.0.8",
+    "astro": "^2.0.11"
   },
   "devDependencies": {
     "@astrojs/image": "^0.15.0",

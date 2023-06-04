@@ -1,9 +1,11 @@
-import { Pagination } from "@kokorotobita/paginize/"
+import { Paginize } from "@kokorotobita/paginize"
 
 export const paginationLib = () => {
-  new Pagination(".paginize", {
-    perPage: 8,
-    pageRangeDisplayed: 5,
-    isChooseUp: true,
+  new Paginize(".paginize", {
+    perPage: 3,
+    breakpoint: {
+      minWidth: 768,
+      perPage: 5,
+    },
   })
 }

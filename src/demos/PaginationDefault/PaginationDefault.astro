@@ -5,11 +5,28 @@ const numbers = Array.from({ length: maxCount }, (_, i) => i + 1)
 
 <div class="paginize">
   <ul class="paginize-contents">
-    {numbers.map((number) => <li class="paginize-item">{number}</li>)}
+    {numbers.map((number) => <li class="paginize-content">{number}</li>)}
   </ul>
-  <div class="paginize-wrapper">
+
+  <!-- <div class="paginize-wrapper">
     <button type="button" class="paginize-prev" aria-label="Back to Previous Page">&lt;</button>
     <div class="paginize-counter"></div>
     <button type="button" class="paginize-next" aria-label="Go to next page">&gt;</button>
-  </div>
+  </div> -->
+
+  <nav aria-label="pagination" class="paginize-wrapper">
+    <button type="button" class="paginize-prev" aria-label="Back to Previous Page">&lt;</button>
+    <ol class="paginize-counter-list" aria-busy="true"></ol>
+    <button type="button" class="paginize-next" aria-label="Go to next page">&gt;</button>
+  </nav>
 </div>
+
+<style>
+  .paginize-wrapper {
+    display: flex;
+    gap: 10px;
+  }
+  .paginize-counter-list {
+    display: flex;
+  }
+</style>

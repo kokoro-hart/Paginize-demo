@@ -1,12 +1,14 @@
-// import { Pagination } from "./dev"
-import { paginationLib } from "./libCheck"
+import { Paginize } from "./dev"
+// import { paginationLib } from "./libCheck"
 
 function App() {
   // running dev
-  // const pagination = new Pagination(".paginize", {})
+  const pagination = new Paginize(".paginize", {
+    perPage: 8,
+  })
 
   // running lib
-  paginationLib()
+  // paginationLib()
 }
 
 export default App()
